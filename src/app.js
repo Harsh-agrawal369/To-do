@@ -97,7 +97,7 @@ app.get("/home", isLogin, (req,res) => {
             }
 
             console.log(results.length);
-            res.render("home", {name: result[0].name, count: count, data: results});
+            res.render("home", {name: result[0].name, count: count, data: results, errorMessage: null});
         })
     })
 })
@@ -177,29 +177,33 @@ app.post("/login", async (req, res) => {
 app.post('/Add-task', (req, res) => {
     const task = req.body.task;
     try{
-        db.query('Insert into tasks set ?', {user_id: req.session.user_id, task: task, completed: 0}, (error, resu) => {
-            if(error){
-                console.log(error);
-                res.render("login", {errorMessage: "Something went Wrong!"});
-            }else{
-                db.query('select * from user where id = ?', [req.session.user_id], (error, result) => {
-                    if(error){
-                        console.error(error);
-                        return res.status(500).send("Internal Server Error");
-                    }
-            
-                    db.query('select * from tasks where user_id = ?', [req.session.user_id], (error, results) => {
+        if(task.length==0){
+            res.status(204).send();
+        }else{
+            db.query('Insert into tasks set ?', {user_id: req.session.user_id, task: task, completed: 0}, (error, resu) => {
+                if(error){
+                    console.log(error);
+                    res.render("login", {errorMessage: "Something went Wrong!"});
+                }else{
+                    db.query('select * from user where id = ?', [req.session.user_id], (error, result) => {
                         if(error){
                             console.error(error);
                             return res.status(500).send("Internal Server Error");
                         }
-            
-                        console.log(results.length);
-                        res.render("home", {name: result[0].name, count: results.length, data: results} );
+                
+                        db.query('select * from tasks where user_id = ?', [req.session.user_id], (error, results) => {
+                            if(error){
+                                console.error(error);
+                                return res.status(500).send("Internal Server Error");
+                            }
+                
+                            console.log(results.length);
+                            res.render("home", {name: result[0].name, count: results.length, data: results, errorMessage: null} );
+                        })
                     })
-                })
-            }
-        })
+                }
+            })
+        }
 
     } catch(err){
         console.log(err);
@@ -261,4 +265,23 @@ app.get("/incomp/:id", (req,res) => {
         res.render("login", {errorMessage: "Something went Wrong!"})
     }
 })
+
+//Function to edit data in the database
+app.post('/edit', (req, res) => {
+    const task = req.body.task;
+    const id = req.body.hid_id;
+    // console.log(task);
+    // console.log(id);
+
+    // Assuming you have a database connection (db) set up
+    db.query('update tasks set task =? where id = ?', [task, id], (error, result) => {
+        if (error) {
+            console.error(error);
+            res.status(500).send({ error: 'Internal Server Error' });
+            return;
+        }
+        res.redirect("/home");
+    });
+});
+
 

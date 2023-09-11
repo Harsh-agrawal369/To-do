@@ -52,27 +52,56 @@
                 <%data.forEach(i => { %>
                     <%if(i.completed == 0){%>
                         <div class="task">
+                            <input type="hidden" id="task_val" value="<%=i.id%>">
                             <a href="/comp/<%=i.id%>"><button class="comp" onclick=""><i class="fa-regular fa-circle-check"></i></button></a>
                             <span class="taskname"><%=i.task%></span>
-                            <button class="edit"> <i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="edit" onclick="addTask(this)" value="<%=i.id %>"> <i class="fa-solid fa-pen-to-square"></i></button>
                             <a href="/delete/<%=i.id%>"><button class="delete" id="del-btn"><i class="fa-solid fa-trash"></i> </button></a>
                         </div>
                     <%}else {%>
                         <div class="task">
                             <a href="/incomp/<%=i.id%>"><button class="incomp" ><i class="fa-regular fa-circle-check"></i></button></a>
                             <span class="taskname" style="text-decoration: line-through;"><%=i.task%></span>
-                            <button class="edit"> <i class="fa-solid fa-pen-to-square"></i></button>
+                            <!-- <button class="edit"> <i class="fa-solid fa-pen-to-square"></i></button> -->
                             <a href="/delete/<%=i.id%>"><button class="delete" id="del-btn"><i class="fa-solid fa-trash"></i> </button></a>
                         </div>
                     <%}%>
                 <%})%>
             </div>
         </div>
-        <p class="error">Input cannot be empty!</p>
+        <p class="error" style="display: none;">Task cannot be empty!</p>
+        
+        
     </div>
 
     <script>
         
+        function addTask(button) {
+            const taskContainer = button.parentElement;
+            const taskId = taskContainer.querySelector('#task_val').value;
+
+            const newTaskHTML = `<div>
+                    <form action="/edit" method="post" class="d-flex task"> 
+                        <a><button class="comp" onclick=""><i class="fa-regular fa-circle-check"></i></button></a>
+                        <input type="hidden" name="hid_id" value=${taskId}>
+                        <span class="taskname" id="taskInput"><input type="text" name="task"></span>
+                        <button class="edit" type="submit"> <i class="fa-regular fa-circle-check"></i></button> 
+                    </form>
+                
+                </div>
+            
+            `
+            taskContainer.outerHTML = newTaskHTML;
+        }
+
+        document.getElementById('add-btn').addEventListener('click', function() {
+            var task = document.getElementById('taskInput').value;
+
+            if (task.length == 0) {
+                document.querySelector('.error').style.display = 'block';
+            } else {
+            }
+        });
         function markComplete(button) {
             const task = button.parentElement.nextElementSibling; // Get the taskname element
             task.classList.toggle('completed'); // Toggle the 'completed' class
