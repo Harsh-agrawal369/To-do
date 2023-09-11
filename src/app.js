@@ -2,13 +2,14 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const mysql = require("mysql");
-const { error } = require("console");
+const { error, count } = require("console");
 const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const config = require("../src/config/config");
 const { isLogout, isLogin } = require("./middleware/Auth");
+const { name } = require("ejs");
 
 //Creating port variable 5000
 const PORT= process.env.PORT || 5000;
@@ -76,16 +77,42 @@ app.get("/login", isLogout, (req,res) => {
 })
 
 //Render home
-app.get("/home", isLogin, (req,res) =>{
+app.get("/home", isLogin, (req,res) => {
     db.query('select * from user where id = ?', [req.session.user_id], (error, result) => {
         if(error){
-            console.log(error)
-        } else{
-            return res.render("home", {name: result[0].name})
+            console.error(error);
+            return res.status(500).send("Internal Server Error");
         }
+
+        db.query('select * from tasks where user_id = ?', [req.session.user_id], (error, results) => {
+            let count =0;
+            for(i=0; i<results.length; i++){
+                if(results[i].completed == 0){
+                    count++;
+                }
+            }
+            if(error){
+                console.error(error);
+                return res.status(500).send("Internal Server Error");
+            }
+
+            console.log(results.length);
+            res.render("home", {name: result[0].name, count: count, data: results});
+        })
     })
 })
 
+
+//Logout function
+app.get("/logout", isLogin, (req,res) => {
+    try{
+      req.session.destroy();
+      res.redirect('/');
+    }catch(err){
+      console.log(err);z
+    }
+})
+  
 
 //Handling post request from Sign-up
 
@@ -136,7 +163,7 @@ app.post("/login", async (req, res) => {
 
             if (match) {
                 req.session.user_id = results[0].id;
-                return res.render("home", {name: results[0].name});
+                return res.redirect("/home");
             } else {
                 return res.render("login", { errorMessage: "Wrong Password!" });
             }
@@ -146,4 +173,92 @@ app.post("/login", async (req, res) => {
         }
     });
 });
+
+app.post('/Add-task', (req, res) => {
+    const task = req.body.task;
+    try{
+        db.query('Insert into tasks set ?', {user_id: req.session.user_id, task: task, completed: 0}, (error, resu) => {
+            if(error){
+                console.log(error);
+                res.render("login", {errorMessage: "Something went Wrong!"});
+            }else{
+                db.query('select * from user where id = ?', [req.session.user_id], (error, result) => {
+                    if(error){
+                        console.error(error);
+                        return res.status(500).send("Internal Server Error");
+                    }
+            
+                    db.query('select * from tasks where user_id = ?', [req.session.user_id], (error, results) => {
+                        if(error){
+                            console.error(error);
+                            return res.status(500).send("Internal Server Error");
+                        }
+            
+                        console.log(results.length);
+                        res.render("home", {name: result[0].name, count: results.length, data: results} );
+                    })
+                })
+            }
+        })
+
+    } catch(err){
+        console.log(err);
+        res.render("login", {errorMessage: "Something went Wrong!"});
+    }
+});
+
+app.get("/delete/:id", (req,res) =>{
+    const {id} = req.params;
+    
+    try{
+        db.query('delete from tasks where id = ?', [id], (error,result)=> {
+            if(error){
+                console.log(err);
+                res.render("login", {errorMessage: "Something went Wrong!"})
+            }
+            else{
+                res.redirect("/home")
+            }
+        })
+    }catch(err){
+        console.log(err);
+        res.render("login", {errorMessage: "Something went Wrong!"})
+    }
+})
+
+app.get("/comp/:id", (req,res) => {
+    const {id} = req.params;
+    try{
+        db.query('update tasks set completed = 1 where id = ?', [id], (error,result)=>{
+            if(error){
+                console.log(err);
+                res.render("login", {errorMessage: "Something went Wrong!"})
+            }
+            else{
+                res.redirect("/home")
+            }
+        })
+    }catch(err){
+        console.log(err);
+        res.render("login", {errorMessage: "Something went Wrong!"})
+    }
+})
+
+app.get("/incomp/:id", (req,res) => {
+    const {id} = req.params;
+    try{
+        db.query('update tasks set completed = 0 where id = ?', [id], (error,result)=>{
+            if(error){
+                console.log(err);
+                res.render("login", {errorMessage: "Something went Wrong!"})
+            }
+            else{
+                res.redirect("/home")
+            }
+        })
+    }catch(err){
+        console.log(err);
+        res.render("login", {errorMessage: "Something went Wrong!"})
+    }
+})
 
