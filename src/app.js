@@ -76,6 +76,85 @@ app.get("/login", isLogout, (req,res) => {
     res.render("login", {errorMessage: null})
 })
 
+//Render my Profile
+app.get("/myprofile", isLogin, (req,res) => {
+    db.query('select * from user where id = ? ', [req.session.user_id], (error,result) =>{
+        if(error){
+            console.error(error);
+            return res.status(500).send("Internal Server Error");
+        }
+        else{
+            // console.log(result);
+            res.render("myprofile", {name: result[0].name, data: result[0]});
+        }
+    })
+})
+
+//Rendering Backhome
+app.get("/backhome",isLogin, (req,res) => {
+    try{
+        res.redirect("/home");
+    }catch(err){
+        console.error(error);
+        return res.status(500).send("Internal Server Error");
+    }
+})
+
+//Rendering changePassword
+app.get("/changepassword", isLogin, (req,res) => {
+    db.query('select * from user where id = ? ', [req.session.user_id], (error,result) =>{
+        if(error){
+            console.error(error);
+            return res.status(500).send("Internal Server Error");
+        }
+        else{
+            // console.log(result);
+            res.render("changepass", {name: result[0].name, error: null});
+        }
+    })
+})
+
+//Update Password
+app.post("/updatepass", isLogin, (req,res)=> {
+    const pass= req.body.Password;
+    const cpass= req.body.confirmPassword;
+    db.query('select * from user where id = ? ', [req.session.user_id], async (error,result) =>{
+        if(error){
+            console.error(error);
+            return res.status(500).send("Internal Server Error");
+        }
+        else{
+            if(pass!=cpass){
+                res.render("changepass", {name: result[0].name, error: "Passwords do not match!"});
+            }
+            else{
+                const hashedPassword = result[0].password;
+
+                try {
+                    const match = await bcrypt.compare(pass, hashedPassword);
+
+                    if (match) {
+                        return res.render("changepass", { name: result[0].name,error: "Password cannot be same as old password!" });
+                    } else {
+                        let newhashedpassword = await bcrypt.hash(pass, 8);
+                        db.query('update user set password = ? WHERE id = ?', [newhashedpassword, req.session.user_id], (error,results) => {
+                            if(error){
+                                console.error(error);
+                                return res.status(500).send("Internal Server Error");
+                            }else{
+                                res.render("changepass", {name: result[0].name, error: "password Updated Successfully!"})
+                            }
+                        })
+                    }
+                } catch (error) {
+                    console.error(error);
+                    return res.render("login", { errorMessage: "Something went wrong" });
+                }
+            }
+        }
+    })
+})
+
 //Render home
 app.get("/home", isLogin, (req,res) => {
     db.query('select * from user where id = ?', [req.session.user_id], (error, result) => {
@@ -96,7 +175,7 @@ app.get("/home", isLogin, (req,res) => {
                 return res.status(500).send("Internal Server Error");
             }
 
-            console.log(results.length);
+            // console.log(results.length);
             res.render("home", {name: result[0].name, count: count, data: results, errorMessage: null});
         })
     })

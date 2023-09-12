@@ -44,26 +44,26 @@
             <div class="tasks">
 
                 <% if(count){ %>
-                    <p class="pending-tasks-count">You have <%=count%> task(s) to complete.</p>
+                    <p class="pending-tasks-count">You have <span><%=count%> </span>task(s) to complete.</p>
                 <% } else { %>
-                    <p class="pending-tasks-count">You have 0 task(s) to complete.</p>
+                    <p class="pending-tasks-count">You have <span>0</span> task(s) to complete.</p>
                 <% } %>
 
                 <%data.forEach(i => { %>
                     <%if(i.completed == 0){%>
                         <div class="task">
                             <input type="hidden" id="task_val" value="<%=i.id%>">
-                            <a href="/comp/<%=i.id%>"><button class="comp" onclick=""><i class="fa-regular fa-circle-check"></i></button></a>
+                            <a href="/comp/<%=i.id%>"><button class="comp" onclick="" id="comp" ><i class="fa-solid fa-check"></i></button></a>
                             <span class="taskname"><%=i.task%></span>
-                            <button class="edit" onclick="addTask(this)" value="<%=i.id %>"> <i class="fa-solid fa-pen-to-square"></i></button>
-                            <a href="/delete/<%=i.id%>"><button class="delete" id="del-btn"><i class="fa-solid fa-trash"></i> </button></a>
+                            <button class="edit" onclick="addTask(this)" value="<%=i.id %>"> <i style="color: rgb(255, 255, 255);" class="fa-solid fa-pen-to-square"></i></button>
+                            <a href="/delete/<%=i.id%>"><button class="delete" id="del-btn"><i class="fa-solid fa-trash" style="color: rgba(255, 255, 255, 0.88);"></i> </button></a>
                         </div>
                     <%}else {%>
                         <div class="task">
-                            <a href="/incomp/<%=i.id%>"><button class="incomp" ><i class="fa-regular fa-circle-check"></i></button></a>
-                            <span class="taskname" style="text-decoration: line-through;"><%=i.task%></span>
-                            <!-- <button class="edit"> <i class="fa-solid fa-pen-to-square"></i></button> -->
-                            <a href="/delete/<%=i.id%>"><button class="delete" id="del-btn"><i class="fa-solid fa-trash"></i> </button></a>
+                            <a href="/incomp/<%=i.id%>"><button class="incomp" id="comp" ><i class="fa-solid fa-check"></i></button></a>
+                            <span class="taskname" style="text-decoration: line-through; color: rgb(90, 90, 90);"><%=i.task%></span>
+                            <button class="edit"> <i class="fa-solid fa-pen-to-square" style="color: rgb(255, 255, 255);"></i></button>
+                            <a href="/delete/<%=i.id%>"><button class="delete" id="del-btn"><i class="fa-solid fa-trash" style="color: rgba(255, 255, 255, 0.88);"></i> </button></a>
                         </div>
                     <%}%>
                 <%})%>
@@ -81,11 +81,10 @@
             const taskId = taskContainer.querySelector('#task_val').value;
 
             const newTaskHTML = `<div>
-                    <form action="/edit" method="post" class="d-flex task"> 
-                        <a><button class="comp" onclick=""><i class="fa-regular fa-circle-check"></i></button></a>
+                    <form action="/edit" method="post" class="d-flex task" style="margin-top: 1em;"> 
                         <input type="hidden" name="hid_id" value=${taskId}>
                         <span class="taskname" id="taskInput"><input type="text" name="task"></span>
-                        <button class="edit" type="submit"> <i class="fa-regular fa-circle-check"></i></button> 
+                        <button class="edit" type="submit" style="padding: 4px 8px;"> <i class="fa-regular fa-circle-check"></i></button> 
                     </form>
                 
                 </div>

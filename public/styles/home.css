@@ -112,7 +112,7 @@ nav > img {
     flex-grow: 1; /* Allow the input to grow and take remaining space */
     background-color: transparent;
     color: #111111;
-    font-size: 0.9em;
+    font-size: 1.2em;
     border: none;
     border-bottom: 2px solid white;
     padding: 1em 0.5em;
@@ -142,4 +142,65 @@ nav > img {
     margin-top: 1.5em;
     padding: 1em 0;
     border-radius: 10px;
+}
+
+.tasks{
+    margin-top: 0.2em;
+    border-radius: 0.5em;
+    width: 100%;
+    position: relative;
+    padding: 1em 0.5em;
+    font-size: 1.2em;
+}
+.task{
+    font-size: 1.35em;
+    padding: 0.8em 0.8em;
+    display: grid;
+    grid-template-columns: 1fr 8fr 2fr 2fr;
+    gap: 0.8em;
+    background-color: white;
+    border-radius: 0.5em;
+    box-shadow: 0 0 0.5 rgba(0, 0, 0, 0.527);
+}
+.task:not(:first-child){
+    margin-top: 0.8em;
+}
+
+.task > a{
+    width: 25px;
+    border: 0px;
+}
+
+.task>a>button{
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+#comp{
+    border: 1.3px solid black;
+    background-color: rgba(255, 255, 255, 0.942);
+    border-radius: 50%;
+    padding: 0px 4px;
+}
+
+.task span{
+    font-weight: 400;
+    word-break: break-all;
+}
+
+.edit{
+    border: 0.5px solid black;
+    border-radius: 4px;
+    background-color: rgb(83, 181, 247);
+}
+
+.delete{
+    width: 200%;
+    background-color: rgba(255, 1, 1, 0.942);
+    border: 0.5px solid black;
+    border-radius: 4px;
+}
+
+.pending-tasks-count span{
+    color: rgb(0, 132, 255);
 }
